@@ -1,6 +1,8 @@
 # OTask-1
 import java.util.Scanner;
+<br>
 import java.util.Random;
+<br>
 
 public class NumberGuessingGame {
     public static void main(String[] args) {
