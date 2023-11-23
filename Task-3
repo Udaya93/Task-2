@@ -1,0 +1,198 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Date;
+
+class Transaction {
+    private Date date;
+    private String description;
+    private double amount;
+
+    public Transaction(String description, double amount) {
+        this.date = new Date();
+        this.description = description;
+        this.amount = amount;
+    }
+
+    @Override
+    public String toString() {
+        return "Date: " + date + ", Description: " + description + ", Amount: $" + amount;
+    }
+}
+
+class BankAccount {
+    private String accountNumber;
+    private String accountHolder;
+    private double balance;
+    private ArrayList<Transaction> transactionHistory;
+
+    public BankAccount(String accountNumber, String accountHolder, double balance) {
+        this.accountNumber = accountNumber;
+        this.accountHolder = accountHolder;
+        this.balance = balance;
+        this.transactionHistory = new ArrayList<>();
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public ArrayList<Transaction> getTransactionHistory() {
+        return transactionHistory;
+    }
+
+    public void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            transactionHistory.add(new Transaction("Withdrawal", amount));
+            System.out.println("Withdrawal successful. Remaining balance: $" + balance);
+        } else {
+            System.out.println("Invalid amount or insufficient funds.");
+        }
+    }
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            transactionHistory.add(new Transaction("Deposit", amount));
+            System.out.println("Deposit successful. New balance: $" + balance);
+        } else {
+            System.out.println("Invalid amount. Please enter a positive value.");
+        }
+    }
+
+    public void transfer(BankAccount recipient, double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            recipient.deposit(amount);
+            transactionHistory.add(new Transaction("Transfer to " + recipient.getAccountHolder(), amount));
+            System.out.println("Transfer successful. Remaining balance: $" + balance);
+        } else {
+            System.out.println("Invalid amount or insufficient funds for transfer.");
+        }
+    }
+
+    public String getAccountHolder() {
+        return accountHolder;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+}
+
+class ATM {
+    private Map<String, String> userCredentials;
+    private BankAccount currentAccount;
+
+    public ATM() {
+        userCredentials = new HashMap<>();
+        userCredentials.put("user123", "1234"); // Sample user ID and PIN
+    }
+
+    public void start() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter User ID: ");
+        String userId = scanner.nextLine();
+
+        System.out.print("Enter PIN: ");
+        String pin = scanner.nextLine();
+
+        if (authenticateUser(userId, pin)) {
+            System.out.println("Authentication successful. Welcome, " + userId + "!");
+            performATMOperations(scanner);
+        } else {
+            System.out.println("Authentication failed. Exiting...");
+        }
+
+        scanner.close();
+    }
+
+    private boolean authenticateUser(String userId, String pin) {
+        return userCredentials.containsKey(userId) && userCredentials.get(userId).equals(pin);
+    }
+
+    private void performATMOperations(Scanner scanner) {
+        currentAccount = new BankAccount("123456789", "John Doe", 1000.0);
+
+        int choice;
+
+        do {
+            System.out.println("\nATM Menu:");
+            System.out.println("1. Transaction History");
+            System.out.println("2. Withdraw Money");
+            System.out.println("3. Deposit Money");
+            System.out.println("4. Transfer Money");
+            System.out.println("5. Quit");
+
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    displayTransactionHistory();
+                    break;
+                case 2:
+                    withdrawMoney(scanner);
+                    break;
+                case 3:
+                    depositMoney(scanner);
+                    break;
+                case 4:
+                    transferMoney(scanner);
+                    break;
+                case 5:
+                    System.out.println("Thank you for using the ATM. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+
+        } while (choice != 5);
+    }
+
+    private void displayTransactionHistory() {
+        ArrayList<Transaction> transactions = currentAccount.getTransactionHistory();
+        if (transactions.isEmpty()) {
+            System.out.println("No transactions found.");
+        } else {
+            System.out.println("Transaction History for " + currentAccount.getAccountHolder() + ":");
+            for (Transaction transaction : transactions) {
+                System.out.println(transaction);
+            }
+        }
+    }
+
+    private void withdrawMoney(Scanner scanner) {
+        System.out.print("Enter the amount to withdraw: $");
+        double amount = scanner.nextDouble();
+        currentAccount.withdraw(amount);
+    }
+
+    private void depositMoney(Scanner scanner) {
+        System.out.print("Enter the amount to deposit: $");
+        double amount = scanner.nextDouble();
+        currentAccount.deposit(amount);
+    }
+
+    private void transferMoney(Scanner scanner) {
+        System.out.print("Enter recipient's account number: ");
+        String recipientAccountNumber = scanner.next();
+
+        // For simplicity, assuming the recipient is always a pre-existing account
+        BankAccount recipient = new BankAccount(recipientAccountNumber, "Recipient", 0.0);
+
+        System.out.print("Enter the amount to transfer: $");
+        double amount = scanner.nextDouble();
+        currentAccount.transfer(recipient, amount);
+    }
+}
+
+public class ATMSystem {
+    public static void main(String[] args) {
+        ATM atm = new ATM();
+        atm.start();
+    }
+}
