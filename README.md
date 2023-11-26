@@ -1,8 +1,5 @@
-# OTask-1
-import java.util.Scanner;
-<br>
 import java.util.Random;
-<br>
+import java.util.Scanner;
 
 public class NumberGuessingGame {
     public static void main(String[] args) {
@@ -12,64 +9,53 @@ public class NumberGuessingGame {
         int minRange = 1;
         int maxRange = 100;
         int maxAttempts = 10;
+        int totalRounds = 3;
         int score = 0;
 
         System.out.println("Welcome to the Number Guessing Game!");
 
-        boolean playAgain;
+        for (int round = 1; round <= totalRounds; round++) {
+            int targetNumber = random.nextInt(maxRange - minRange + 1) + minRange;
+            int attempts = 0;
 
-        do {
-            playRound(scanner, random, minRange, maxRange, maxAttempts);
-            score++;
+            System.out.println("\nRound " + round + " - Guess the number between " + minRange + " and " + maxRange);
 
-            System.out.print("Do you want to play again? (yes/no): ");
-            playAgain = scanner.next().equalsIgnoreCase("yes");
+            while (attempts < maxAttempts) {
+                System.out.print("Enter your guess (Attempt " + (attempts + 1) + "/" + maxAttempts + "): ");
+                int guess = scanner.nextInt();
+                attempts++;
 
-        } while (playAgain);
+                if (guess < minRange || guess > maxRange) {
+                    System.out.println("Your guess is out of the valid range.");
+                } else if (guess == targetNumber) {
+                    System.out.println("Congratulations! You've guessed the correct number in " + attempts + " attempts.");
+                    score += calculatePoints(attempts);
+                    break;
+                } else if (guess < targetNumber) {
+                    System.out.println("Try a higher number.");
+                } else {
+                    System.out.println("Try a lower number.");
+                }
 
-        System.out.println("Game over! Your total score is: " + score);
+                if (attempts == maxAttempts) {
+                    System.out.println("Sorry, you've reached the maximum number of attempts. The correct number was " + targetNumber);
+                }
+            }
+        }
+
+        System.out.println("\nGame over! Your total score is: " + score);
         scanner.close();
     }
 
-    private static void playRound(Scanner scanner, Random random, int minRange, int maxRange, int maxAttempts) {
-        int targetNumber = random.nextInt(maxRange - minRange + 1) + minRange;
-        int attempts = 0;
-
-        System.out.println("Round " + (score + 1));
-
-        while (attempts < maxAttempts) {
-            int guess = getValidGuess(scanner, minRange, maxRange);
-            attempts++;
-
-            if (guess == targetNumber) {
-                System.out.println("Congratulations! You've guessed the correct number in " + attempts + " attempts.");
-                break;
-            } else if (guess < targetNumber) {
-                System.out.println("Try a higher number.");
-            } else {
-                System.out.println("Try a lower number.");
-            }
-
-            if (attempts == maxAttempts) {
-                System.out.println("Sorry, you've reached the maximum number of attempts. The correct number was " + targetNumber);
-            }
+    private static int calculatePoints(int attempts) {
+        // You can customize the scoring logic based on the number of attempts
+        // For example, more points for fewer attempts
+        if (attempts <= 3) {
+            return 10;
+        } else if (attempts <= 6) {
+            return 5;
+        } else {
+            return 2;
         }
-    }
-
-    private static int getValidGuess(Scanner scanner, int minRange, int maxRange) {
-        int guess;
-
-        while (true) {
-            System.out.print("Enter your guess: ");
-            guess = scanner.nextInt();
-
-            if (guess < minRange || guess > maxRange) {
-                System.out.println("Your guess is out of the valid range.");
-            } else {
-                break;
-            }
-        }
-         
-        return guess;
     }
 }
